@@ -1,0 +1,71 @@
+// nodule: std.diag.guarantee_matrix
+// The `std.diag` guarantee matrix — encoded as **data**, asserted in tests (RFC-0016 §4.5; spec §4).
+//
+// Every exported operation has exactly one row describing:
+// - Its honest guarantee tag on `Exact ⊐ Proven ⊐ Empirical ⊐ Declared` (VR-5).
+// - Its fallibility and the explicit error set (C1 — never-silent).
+// - Its declared effects (C6 — "none" for all `diag` ops except `sink`).
+// - Whether it exposes a C3 EXPLAIN artifact.
+// - The never-silent property: how the underlying error is preserved (I1 — presentation never
+//   gates propagation; no row permits a silent drop).
+//
+// # Guarantee tag justification (VR-5 — downgrade rather than overclaim)
+//
+// **All `diag` ops are `Exact`** because the module has **no accuracy semantics of its own**: a
+// diagnostic is a faithful, content-addressed *re-presentation* of an explicit error (RFC-0016
+// C2, the `len`-style case). `present` does not compute an approximate result; it pairs a truth
+// with a view of it. The honesty work `diag` does is *structural* (I1 — never suppress) and
+// *reporting* (RT5/VR-5 — surface a tag honestly), not *bounding*.
+//
+// The lattice tags that appear in `guarantee` / `audit_of` are **reported data, not op
+// guarantees**: `guarantee` returns the route's delivery strength (≤ `Declared` in v0, `None`
+// for `null`), and `audit_of` reports each crossing's bound as recorded — both downgrade-honest,
+// never upgraded (RT5/VR-5).
+//
+// # Never-silent property (I1 / RFC-0013 / RFC-0016 C1)
+//
+// The structural proof that no row can suppress the presented error:
+// - `present` is total and returns the error **unchanged** alongside the diagnostic (I1).
+// - Every fallible op (`from_json`, `resolve`, `on`, `from_file`, `resolve_route`, `sink`) fails
+//   **explicitly** — `Err(...)` / `None` / `Some(Err(...))`, never a sentinel or silent default.
+// - Route/sink resolution is **dispatched outside `present`** so even a `null` route or an
+//   `UnknownRoute` leaves the underlying error already surfaced and propagating.
+// @summary: best-effort transpilation via mycelium-transpile (M-873). Declared,
+// unvalidated — no Mycelium parser/typechecker confirms this output; see the
+// accompanying .gap.json for every construct this pass could not express.
+nodule std.diag.guarantee_matrix;
+
+// Fallibility classification for a `std.diag` exported op.
+type Fallibility = Total | Explicit;
+
+impl Show[Fallibility] for Fallibility {
+  fn render(x: Fallibility) => Bytes =
+    match x { Total => "Total", Explicit => "Explicit" };
+};
+
+fn eq_Fallibility(a: Fallibility, b: Fallibility) => Binary{1} =
+  match a { Total => match b { Total => 0b1, _ => 0b0 }, Explicit => match b { Explicit => 0b1, _ => 0b0 } };
+
+// Whether an op exposes a C3 EXPLAIN artifact.
+type Explainable = IsExplainRecord | ContentAddressedHandle | NotApplicable | ClosedVocabulary;
+
+impl Show[Explainable] for Explainable {
+  fn render(x: Explainable) => Bytes =
+    match x { IsExplainRecord => "IsExplainRecord", ContentAddressedHandle => "ContentAddressedHandle", NotApplicable => "NotApplicable", ClosedVocabulary => "ClosedVocabulary" };
+};
+
+fn eq_Explainable(a: Explainable, b: Explainable) => Binary{1} =
+  match a { IsExplainRecord => match b { IsExplainRecord => 0b1, _ => 0b0 }, ContentAddressedHandle => match b { ContentAddressedHandle => 0b1, _ => 0b0 }, NotApplicable => match b { NotApplicable => 0b1, _ => 0b0 }, ClosedVocabulary => match b { ClosedVocabulary => 0b1, _ => 0b0 } };
+
+// One row in the `std.diag` guarantee matrix (RFC-0016 §4.5; spec §4).
+//
+// Encoded as data so tests can assert invariants structurally — never prose-only.
+type MatrixRow = MatrixRow(Bytes, Bytes, Fallibility, Bytes, Bytes, Explainable, Bytes);
+
+impl Show[MatrixRow] for MatrixRow {
+  fn render(x: MatrixRow) => Bytes =
+    match x { MatrixRow(p0, p1, p2, p3, p4, p5, p6) => bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat(bytes_concat("MatrixRow(", render(p0)), ", "), render(p1)), ", "), render(p2)), ", "), render(p3)), ", "), render(p4)), ", "), render(p5)), ", "), render(p6)), ")") };
+};
+
+fn eq_MatrixRow(a: MatrixRow, b: MatrixRow) => Binary{1} =
+    match a { MatrixRow(p0, p1, p2, p3, p4, p5, p6) => match b { MatrixRow(q0, q1, q2, q3, q4, q5, q6) => and(and(and(and(and(and(bytes_eq(p0, q0), bytes_eq(p1, q1)), eq_Fallibility(p2, q2)), bytes_eq(p3, q3)), bytes_eq(p4, q4)), eq_Explainable(p5, q5)), bytes_eq(p6, q6)) } };

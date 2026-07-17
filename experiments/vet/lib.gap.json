@@ -1,0 +1,37 @@
+{
+  "source": "/root/git/isolated/mycelium/crates/mycelium-std-diag/src/lib.rs",
+  "emitted_items": [],
+  "gaps": [
+    {
+      "file": "/root/git/isolated/mycelium/crates/mycelium-std-diag/src/lib.rs",
+      "line": 1,
+      "col": 1,
+      "category": "InnerAttr",
+      "rust_construct": "InnerAttr",
+      "snippet": "# ! [forbid (unsafe_code)]",
+      "reason": "crate/file-level inner attributes (#![...]) are not transpiled (no nodule-header equivalent for these Rust-specific directives)",
+      "item_name": null
+    },
+    {
+      "file": "/root/git/isolated/mycelium/crates/mycelium-std-diag/src/lib.rs",
+      "line": 60,
+      "col": 1,
+      "category": "Import",
+      "rust_construct": "Import",
+      "snippet": "pub use mycelium_diag :: { Code , ContentHash , Diag , Locus , Severity , Trace } ;",
+      "reason": "`use mycelium_diag::Code` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2); `use mycelium_diag::ContentHash` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2); `use mycelium_diag::Diag` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2); `use mycelium_diag::Locus` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2); `use mycelium_diag::Severity` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2); `use mycelium_diag::Trace` — `mycelium_diag` is not a sibling module OR sibling phylum transpiled in this same batch (an external crate, `std`, or simply out of this batch's target set). Flagged, not guessed (VR-5/G2)",
+      "item_name": null
+    },
+    {
+      "file": "/root/git/isolated/mycelium/crates/mycelium-std-diag/src/lib.rs",
+      "line": 62,
+      "col": 1,
+      "category": "ModuleDecl",
+      "rust_construct": "ModuleDecl",
+      "snippet": "# [doc = \" The §4.5 guarantee matrix — encoded as data, asserted in tests (RFC-0016 §4.5; spec §4).\"] pub mod guarantee_matrix ;",
+      "reason": "external `mod foo;` declaration — file-linkage, not translatable library surface (Mycelium's nodule-per-file model makes the module tree implicit in the file layout; the sibling file transpiles as its own nodule). Excluded from the expressible-fraction denominator, recorded not dropped",
+      "item_name": "guarantee_matrix"
+    }
+  ],
+  "total_top_level_items": 2
+}
